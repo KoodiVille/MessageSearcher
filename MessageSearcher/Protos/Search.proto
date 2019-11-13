@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+option csharp_namespace = "SearchAPI";
+
+package search;
+
+service SearchAPI {
+  rpc Search (SearchRequest) returns (SearchResponse);
+  rpc InitScroll (InitScrollRequest) returns (ScrollResponse);
+  rpc Scroll (ScrollRequest) returns (ScrollResponse);
+}
+
+message ScrollRequest {
+    string scrollId = 1;    
+}
+
+message InitScrollRequest {
+    string timestamp = 1;
+    int32 size = 2;
+    enum Direction {
+     GTE = 0;
+     LTE = 1;
+	}
+    Direction direction = 3;
+    
+}
+
+message SearchRequest {
+  string query = 1;
+  string time = 2;
+}
+
+message ScrollResponse {
+  repeated Result results = 1;
+  string scrollId = 2;
+}
+
+message SearchResponse {
+  repeated Result results = 1;
+}
+
+message Result {
+  string id = 1;
+  string message = 2;
+  string channel = 3;
+  string displayName = 4;
+  string timestamp = 5;
+}

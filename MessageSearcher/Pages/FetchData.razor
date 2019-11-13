@@ -1,0 +1,81 @@
+﻿@page "/fetchdata"
+
+<h1>Chat search</h1>
+<input class="input-group-text" id="search" @bind="query" />
+<button class="btn btn-primary" id="search-button" @onclick="Search">Search</button>
+<button class="btn btn-primary" id="scroll" @onclick="Scroll">Scroll</button>
+
+
+@if (response != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>message</th>
+                <th>channel</th>
+                <th>display name</th>
+                <th>timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var result in response)
+            {
+                <tr @onclick="() => InitScroll(result.Id, result.Timestamp)">
+                    <td>@result.Id</td>
+                    <td>@result.Message</td>
+                    <td>@result.Channel</td>
+                    <td>@result.DisplayName</td>
+                    <td>@result.Timestamp</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private string query;
+    private SearchAPI.SearchAPIClient client;
+    private Google.Protobuf.Collections.RepeatedField<Result> response;
+    private string scrollId;
+
+    protected override Task OnInitializedAsync()
+    {
+        var channel = GrpcChannel.ForAddress("https://localhost:5001");
+        client = new SearchAPI.SearchAPIClient(channel);
+        return Task.CompletedTask;
+    }
+
+    protected async Task Search()
+    {
+        var reply = await client.SearchAsync(new SearchRequest { Query = query });
+        response = reply.Results;
+    }
+
+    protected async Task InitScroll(string id, string timestamp)
+    {
+        var reply =
+            await client.InitScrollAsync(
+                new InitScrollRequest
+                {
+                    Size = 20,
+                    Direction = InitScrollRequest.Types.Direction.Gte,
+                    Timestamp = timestamp
+                });
+
+        response = reply.Results;
+        scrollId = reply.ScrollId;
+    }
+
+    protected async Task Scroll()
+    {
+        if (string.IsNullOrEmpty(scrollId))
+            return;
+
+        var reply = await client.ScrollAsync(new ScrollRequest { ScrollId = scrollId });
+
+        response = reply.Results;
+        scrollId = reply.ScrollId;
+    }
+}
