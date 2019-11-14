@@ -14,5 +14,9 @@ namespace MessageIndexer.Models
 
         [JsonPropertyName("ts")]
         public string TimeStamp { get; set; }
+
+        [JsonPropertyName("client_msg_id")]
+        public string ClientMessageId { get; set; }
+
     }
 }

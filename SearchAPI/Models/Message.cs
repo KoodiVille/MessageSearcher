@@ -16,7 +16,7 @@ namespace SearchAPI.Models
         public string DisplayName { get; set; }
 
         public string Channel { get; set; }
-        public string TimeStamp { get; set; }
+        public string Timestamp { get; set; }
         public string Text { get; set; }
     }
 }
